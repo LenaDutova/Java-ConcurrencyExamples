@@ -32,6 +32,7 @@
   - CompletableFutureExample - синхронный/асинхронный запуск задач (в фоновом потоке)
 
 ## Virtual Threads (in the Future of jdk 19)
+см. https://blog.devgenius.io/java-virtual-threads-715c162c6c39 
 
 
 
