@@ -1,6 +1,7 @@
 /**
  * Данный пример демонстрирует
  * варианты создания дочерних потоков
+ * (нитей исполнения)
  */
 public class ThreadCreation {
 
@@ -12,13 +13,9 @@ public class ThreadCreation {
         Thread backgroundThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                // можно задать название потока методом setName()
-                // или через конструктор потока
-//                Thread.currentThread().setName("child");
-
-                String name = Thread.currentThread().getName();
-                printStatus(name, true);
-                printStatus(name, false);
+                String childThreadName = Thread.currentThread().getName();
+                printStatus(childThreadName, true);
+                printStatus(childThreadName, false);
             }
         });
         // запускаем его
@@ -71,50 +68,11 @@ public class ThreadCreation {
                 new Thread() {
                     @Override
                     public void run() {
-                        printStatus(Thread.currentThread().getName() + "-" + System.currentTimeMillis(), true);
-
-                        // Поток засыпает в течении 500 мс, просыпается...
-                        try {
-                            sleep(500); // может породить исключение
-                        } catch (InterruptedException e) {
-                            // Если прерывали поток исполнения из вне,
-                            // статус потока может остаться в исполнении.
-                            // Иногда при обработке этой ошибки стоит самостоятельно
-                            // продублировать вызов метода interrupt()
-                            if (!isInterrupted()) interrupt();
-                            e.printStackTrace();
-                        }
-
-                        printStatus(Thread.currentThread().getName() + "-" + System.currentTimeMillis(), false);
-                    }
-                }.start();
-            }
-            case 3 : {
-                // Создание и запуск анонимного потока
-                new Thread() {
-                    @Override
-                    public void run() {
-                        printStatus(Thread.currentThread().getName() + "-" + System.currentTimeMillis(), true);
-
-                        // Поток ожидает 500 мс
-                        // Этот метод парный - поток можно вернуть из ожидания
-                        // вызовом метода notify() или notifyAll()
-                        try {
-                            wait(500); // может породить исключение
-                        } catch (InterruptedException e) {
-                            // Если прерывали поток исполнения из вне,
-                            // статус потока может остаться в исполнении.
-                            // Иногда при обработке этой ошибки стоит самостоятельно
-                            // продублировать вызов метода interrupt()
-                            if (!isInterrupted()) interrupt();
-                            e.printStackTrace();
-                        }
-
-                        printStatus(Thread.currentThread().getName() + "-" + System.currentTimeMillis(), false);
+                        printStatus(Thread.currentThread().getName(), true);
+                        printStatus(Thread.currentThread().getName(), false);
                     }
                 }.start();
             }
         }
-
     }
 }

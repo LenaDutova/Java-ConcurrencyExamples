@@ -1,8 +1,8 @@
-package synchronous;
+package incordec;
 
 /**
  * Данный пример демонстрирует "состязание" двух потоков
- * за результат разделяемой переменной а
+ * за результат разделяемой переменной value
  *
  * Осторожно нет синхронизации
  */
@@ -15,12 +15,9 @@ public class АsyncIncrementAndDecrement {
     public static void main(String[] args) throws InterruptedException {
 
         // Поток, увеличивающий число на единицу
-        Thread increment = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < counter; i++) {
-                    value++;
-                }
+        Thread increment = new Thread(() -> {
+            for (int i = 0; i < counter; i++) {
+                value++;
             }
         });
 

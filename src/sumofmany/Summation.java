@@ -1,4 +1,4 @@
-package cooperative;
+package sumofmany;
 
 /**
  * Данный пример демонстрирует выигрыш
@@ -47,6 +47,8 @@ public class Summation {
 
 
         Thread[] threads = new Thread[COUNT];
+        // Объект, позволяющий потокам вернуть результат
+        // обратно в главный поток исполнения
         SummationCallback callback = new SummationCallback() {
             @Override
             public void call(long part) {
@@ -69,22 +71,31 @@ public class Summation {
         }
 
         System.out.println("sumMany = " + sumMany);
-        time = System.currentTimeMillis() - time;
-        System.out.println("All threads worked " + time + "ms and exited");
+        System.out.println("All threads worked " + (time = System.currentTimeMillis() - time) + "ms and exited");
     }
 }
 
 
-
+/**
+ * Паттерн Обратного вызова (Callback)
+ * Обратный вызов позволяет в методе исполнять код,
+ * который задаётся в аргументах при её вызове
+ *
+ * В примере через метод call() будут возвращаться
+ * результаты суммирования промежутков
+ */
 interface SummationCallback {
     void call(long part);
 }
 
 
-
+/**
+ * Вспомогательный поток суммирования в промежутке
+ * с возвратом результата через Обратный вызов метода
+ */
 class SummationThread extends Thread{
 
-    private long a, b;
+    private long a, b;  // промежуток суммирования
     private SummationCallback callback;
 
     public SummationThread(long a, long b, SummationCallback callback) {
@@ -95,15 +106,12 @@ class SummationThread extends Thread{
 
     @Override
     public void run() {
-        //        long time = System.currentTimeMillis();
-
+        // считаем сумму в промежутке
         long partOfSum = 0;
         for (long j = a; j < b; j++) {
             partOfSum += j;
         }
+        // через обратный вызов, кидаем результат
         callback.call(partOfSum);
-
-        //        time = System.currentTimeMillis() - time;
-        //        System.out.println(getName() + " worked " + time + "ms and exited");
     }
 }

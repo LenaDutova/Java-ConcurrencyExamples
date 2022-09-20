@@ -1,13 +1,20 @@
-package synchronous;
+package incordec;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- *
+ * Данный пример демонстрирует "состязание" двух потоков
+ * за результат разделяемой переменной value
+ * в трех режимах работы:
+ * - Mode.ASYNC - без контроля доступа к значению value
+ * - Mode.SYNC_OBJECT - синхронизация обращения к объекту value
+ * - Mode.SYNC_METHOD - синхронизация методов изменяющих величину value
  */
 public class IncrementAndDecrement {
 
     private static Value value = new Value();
     private static int counter = 500_000;    // различия были заметны
-    private static Mode mode = Mode.ASYNC;
+    private static Mode mode = Mode.SYNC_OBJECT;
 
     public static void main(String[] args) throws InterruptedException {
         long time = System.currentTimeMillis();
@@ -53,12 +60,9 @@ public class IncrementAndDecrement {
         if (decrement.isAlive()) decrement.join();
         if (increment.isAlive()) increment.join();
 
-        System.out.println(value.getValue());
-        time = System.currentTimeMillis() - time;
-        System.out.println("Task worked " + time + "ms on " + mode);
+        System.out.println("Result Value " + value.getValue());
+        System.out.println("Task worked  " + (time = System.currentTimeMillis() - time) + "ms");
     }
-
-
 }
 
 enum Mode {
