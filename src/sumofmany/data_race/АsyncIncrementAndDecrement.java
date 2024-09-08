@@ -1,4 +1,4 @@
-package incordec;
+package sumofmany.data_race;
 
 /**
  * Данный пример демонстрирует "состязание" двух потоков

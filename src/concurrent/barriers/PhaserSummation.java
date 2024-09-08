@@ -1,9 +1,9 @@
-package barriers;
+package concurrent.barriers;
 
 import java.util.concurrent.Phaser;
 
-import static barriers.PhaserSummation.sleepTime;
-import static barriers.PhaserSummation.synchronization;
+import static concurrent.barriers.PhaserSummation.sleepTime;
+import static concurrent.barriers.PhaserSummation.synchronization;
 
 /**
  * Данный пример демонстрирует

@@ -1,12 +1,12 @@
-package barriers;
+package concurrent.barriers;
 
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static barriers.BarrierSummation.sleepTime;
-import static barriers.BarrierSummation.synchronization;
+import static concurrent.barriers.BarrierSummation.sleepTime;
+import static concurrent.barriers.BarrierSummation.synchronization;
 
 /**
  * Данный пример демонстрирует

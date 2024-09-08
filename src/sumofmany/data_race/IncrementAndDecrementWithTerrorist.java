@@ -1,4 +1,4 @@
-package incordec;
+package sumofmany.data_race;
 
 import java.util.Random;
 
@@ -28,10 +28,10 @@ public class IncrementAndDecrementWithTerrorist {
         increment.start();
         decrement.start();
 
-        // TODO: Warning! Если объект разделяемый,
-        //  то все его сеттеры должны синхронизироваться
-        Thread.currentThread().setName("IGIL"); // главный поток - тоже участвует
-        value.setValue(new Random().nextInt());
+        // FIXME: Warning! Если объект разделяемый,
+        // то все его сеттеры должны синхронизироваться
+//        Thread.currentThread().setName("IGIL"); // главный поток - тоже участвует
+//        value.setValue(new Random().nextInt());
 
         // Ожидаем окончания работы обоих
         if (decrement.isAlive()) decrement.join();

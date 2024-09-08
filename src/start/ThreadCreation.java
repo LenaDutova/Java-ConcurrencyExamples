@@ -1,34 +1,43 @@
+package start;
+
+import static java.lang.Thread.sleep;
+
 /**
  * Данный пример демонстрирует
  * варианты создания дочерних потоков
  * (нитей исполнения)
  */
 public class ThreadCreation {
-
     public static void main(String[] args) throws InterruptedException {
-        String mainThreadName = Thread.currentThread().getName();
-        printStatus(mainThreadName, true);
+        System.out.println(Thread.currentThread().getName() + " started");
 
         // создаем дочерний поток
-        Thread backgroundThread = new Thread(new Runnable() {
+        Thread childThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                String childThreadName = Thread.currentThread().getName();
-                printStatus(childThreadName, true);
-                printStatus(childThreadName, false);
+                System.out.println(Thread.currentThread().getName() + " started");
+
+//                goToSleep(); // FIXME 1 : добавить задержку
+
+                System.out.println(Thread.currentThread().getName() + " finished");
             }
         });
+//        childThread.setDaemon(true); // FIXME 2 : изменить статус потока, до его запуска
         // запускаем его
-        backgroundThread.start();
+        childThread.start();
 
         // дожидаемся окончания работы дочернего потока
-//        if (backgroundThread.isAlive()) backgroundThread.join(); //throws InterruptedException
+//        if (childThread.isAlive()) childThread.join(); //throws InterruptedException
 
-        printStatus(mainThreadName, false);
+        System.out.println(Thread.currentThread().getName() + " finished");
     }
 
-    public static void printStatus (String name, boolean status){
-        System.out.println(name + " " + (status ? "started" : "finished"));
+    protected static void goToSleep() {
+        // методы, уводящие поток от "исполнения", должны быть помещены в блоки проверки,
+        // чтобы иметь возможность обработать прерывания
+        try {
+            sleep(1000);
+        } catch (InterruptedException e) { }
     }
 
     /**
@@ -43,12 +52,11 @@ public class ThreadCreation {
                         new Runnable() {
                             @Override
                             public void run() {
-                                // можно задать название потока методом setName()
+                                // Или можно задать название потока методом setName()
                                 Thread.currentThread().setName("child");
 
-                                String name = Thread.currentThread().getName();
-                                printStatus(name, true);
-                                printStatus(name, false);
+                                System.out.println(Thread.currentThread().getName() + " started");
+                                System.out.println(Thread.currentThread().getName() + " finished");
                             }
                         },
                         "background").start();
@@ -58,8 +66,8 @@ public class ThreadCreation {
                 // Если нить исполнения не требует параметров,
                 // то метод run() можно описать лямбдой
                 new Thread(() -> {
-                    printStatus(Thread.currentThread().getName(), true);
-                    printStatus(Thread.currentThread().getName(), false);
+                    System.out.println(Thread.currentThread().getName() + " started");
+                    System.out.println(Thread.currentThread().getName() + " finished");
                 }).start();
                 break;
             }
@@ -68,8 +76,8 @@ public class ThreadCreation {
                 new Thread() {
                     @Override
                     public void run() {
-                        printStatus(Thread.currentThread().getName(), true);
-                        printStatus(Thread.currentThread().getName(), false);
+                        System.out.println(Thread.currentThread().getName() + " started");
+                        System.out.println(Thread.currentThread().getName() + " finished");
                     }
                 }.start();
             }

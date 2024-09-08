@@ -1,4 +1,4 @@
-package liveness;
+package start.liveness;
 
 /**
  * Данный пример демонстрирует
@@ -11,15 +11,15 @@ public class InterruptedCycle {
 
         //1
         Thread.sleep(10);
-        child.interrupt();
+        child.interrupt();  // попытка прерывания
 
         //2
         Thread.sleep(100);
-        child.interrupt();
+        child.interrupt();  // попытка прерывания
 
         //3
         Thread.sleep(10);
-        child.interrupt();
+        child.interrupt();  // попытка прерывания
 
     }
 }
@@ -45,7 +45,7 @@ class InterruptedThread extends Thread{
         System.out.println(2 + "-я фаза");
         // Поспим, пока не прервут
         try {
-            sleep(10000);
+            sleep(10_000);
         } catch (InterruptedException e) {
             // При прерывании методов wait, sleep, join
             // флаг прерывания остается false
@@ -57,7 +57,7 @@ class InterruptedThread extends Thread{
         System.out.println(3 + "-я фаза");
         // Пока не прервут, выводи b
         while (!isInterrupted()){
-            System.out.print("b");
+            System.out.print("A");
         }
 
         System.out.println(System.lineSeparator() + "isInterrupted = " + isInterrupted());

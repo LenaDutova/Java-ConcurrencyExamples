@@ -1,4 +1,4 @@
-package locks;
+package concurrent.locks;
 
 import java.util.concurrent.Semaphore;
 

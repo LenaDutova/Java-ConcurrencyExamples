@@ -66,7 +66,6 @@ public class CompletableFutureExample {
             }
         });
 
-
         // ожидание до вычисления результата
         if (!future4.isDone()){
             future4.get();

@@ -1,4 +1,4 @@
-package messages;
+package concurrent.messages;
 
 import java.util.concurrent.Exchanger;
 import java.util.concurrent.TimeUnit;

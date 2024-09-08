@@ -1,4 +1,4 @@
-package messages;
+package concurrent.messages;
 
 
 public class CallbackMailbox {
