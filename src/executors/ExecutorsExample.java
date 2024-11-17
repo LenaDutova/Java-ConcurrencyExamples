@@ -8,6 +8,7 @@ import java.util.concurrent.*;
  * при выполнении задач
  *
  * пакета java.util.concurrent
+ * since 1.5
  */
 public class ExecutorsExample {
 
