@@ -19,120 +19,65 @@ public class LifeCycle {
     protected static final int TIME_INTERVAL = 1000;
 
     /**
-     * Главный поток:
-     * 1) сообщает что он жив;
-     * 2) запускает дочерний поток, и опрашивает его статус;
-     * 2.1) дрыхнет и спрашивает статус дочернего (1 или два раза);
-     * 3) получает доступ к разделяемой переменной;
-     * 3.1) изменяет разделяемую переменную и будит связанные с ней потоки;
-     * 3.2) а сам дрыхнет, если требуется;
-     * 4) ждет завершения дочернего.
+     * Дочерний поток спит немного, потом опускает флаг
+     * Главный поток запускает дочерний поток,
+     * и опрашивает его статус до и после подъема флага.
      */
-    public static void main(String[] args) throws InterruptedException {
-        Thread.currentThread().setName(Thread.currentThread().getName().toUpperCase() + "     ");
+    public static void main(String[] args)
+            throws InterruptedException {
 
-        // RUNNABLE - уже работает, т.к. программа запущена
-        System.out.println(new Date() + " - " + Thread.currentThread().getName() + " - " + Thread.currentThread().getState().name());
+        Flag resource = new Flag();
 
-
-        // Создаем разделяемый ресурс, дочерний поток и стартуем его
-        Resource resource = new Resource();
-        ChildThread child = new ChildThread("    child", resource, Thread.currentThread());
-
-        // NEW - запросили, но еще не запустили
-        System.out.println(new Date() + " - " + child.getName().toUpperCase() + " - " + child.getState().name());
-        child.start();  // Стартуем дочерний поток
-        Thread.sleep(TIME_INTERVAL); // Сон, чтобы дочерний поток тоже заснул
-
-        // TIMED_WAITING, когда ждем чего-то по времени, например пока поток поспит заданное время
-        System.out.println(new Date() + " - " + child.getName().toUpperCase() + " - " + child.getState().name() + " - on sleep");
-
-        // region FIXME 1: отбросить ожидание того, что дочерний поток уйдет в ожидание
-        Thread.sleep(2 * TIME_INTERVAL); // Сон, чтобы убедиться, что дочерний заблокирован на операции с ресурсом
-        // WAITING, когда ожидается событие, например окончание работы другого потока или сами ушли в ожидание
-        System.out.println(new Date() + " - " + child.getName().toUpperCase() + " - " + child.getState().name());
-        // endregion FIXME1
-
-        synchronized (resource){
-            System.out.println(new Date() + " - " + Thread.currentThread().getName() + " - resource up");
-            resource.up();  // поднять флаг ресурса и освободить ожидающий поток
-
-//            Thread.sleep(5 * TIME_INTERVAL); // FIXME 2: сон при удержании монитора не отпускает монитор
-
-            // BLOCKED, блокировка, например пока не получит монитор, защищающий ресурс
-            System.out.println(new Date() + " - " + child.getName().toUpperCase() + " - " + child.getState().name());
-            System.out.println(new Date() + " - " + Thread.currentThread().getName() + " - finish use resource");
-        }
-
-        if (child.isAlive()){
-            child.join();
-        }
-        System.out.println(new Date() + " - " + Thread.currentThread().getName() + " - TERMINATED"); // по правде все еще RUNNABLE, но это наиболее близкая точка к завершению
-    }
-}
-
-/**
- * Дочерний поток:
- * 1) спит немного
- * 2) получает доступ к дочерней переменной
- * 2.1) если флаг отрицательный - уходит в ожидание
- * 3) завершается
- */
-class ChildThread extends Thread{
-
-    private Resource resource;
-    private Thread parent;
-
-    public ChildThread(String name, Resource resource, Thread parent) {
-        super(name);
-        this.resource = resource;
-        this.parent = parent;
-        // Thread.currentThread().getName() вернет родительский поток,
-        // так как это еще подготовка к запуску, а не запуск самого потока
-    }
-
-    @Override
-    public void run() {
-        // RUNNABLE - только после вызова start()
-        System.out.println(new Date() + " - " + getName() + " - " + Thread.currentThread().getState().name());
-
-        try {
-            System.out.println(new Date() + " - " + getName() + " - go to sleep ()");
-            sleep(2 * TIME_INTERVAL); // сон на 2 секунды
-            System.out.println(new Date() + " - " + getName() + " - wake up");
-
-            System.out.println(new Date() + " - " + getName() + " - go to resource");
-            synchronized (resource) {
+        Thread child = new Thread(()->{
+            try {
+                Thread.sleep(2 * TIME_INTERVAL);
                 resource.down(); // взять флаг
-            }
-            System.out.println(new Date() + " - " + getName() + " - use resource");
-        } catch (InterruptedException e) { }
+            } catch (InterruptedException e) { }
+        });
 
-        // когда ждем наступления события
-        System.out.println(new Date() + " - " + parent.getName() + " - " + parent.getState().name() + " - on join ");
-        System.out.println(new Date() + " - " + getName() + " - TERMINATED"); // по правде все еще RUNNABLE, но это наиболее близкая точка к завершению
+        System.out.println(child.getState().name());
+        // NEW - запросили, но еще не запустили
+
+        child.start();              // Стартуем дочерний поток
+        System.out.println(child.getState().name());
+        // RUNNABLE - сразу после вызова start(), даже если не исполняется
+
+        Thread.sleep(TIME_INTERVAL); // Дочерний поток спит
+        System.out.println(child.getState().name());
+        // TIMED_WAITING - когда ждем чего-то по времени (sleep, wait, join)
+
+        Thread.sleep(2 * TIME_INTERVAL); // Дочерний выспался, не смог опустить флаг и заблокирован
+        System.out.println(child.getState().name());
+        // WAITING - когда ожидается событие без тайминга (wait, join)
+
+        resource.up();
+        System.out.println(child.getState().name());
+        // BLOCKED - если не успел схватить монитор обратно
+
+        Thread.sleep(TIME_INTERVAL); // Дочерний поток закончил работу
+        System.out.println(child.getState().name());
+        // TERMINATED - когда поток завершился или погиб
     }
 }
 
 /**
  * Некий разделяемый ресурс
  */
-class Resource {
+class Flag {
     private boolean flag = false;
 
+    // Опустить можно только поднятый флаг, иначе ждать
     public synchronized void down() throws InterruptedException {
         if (flag == false) {
-            System.out.println(new Date() + " - " + Thread.currentThread().getName() + " - start wait()"); // ждем наступления события
             wait();
-            System.out.println(new Date() + " - " + Thread.currentThread().getName() + " - waiting finished"); // были пробужены кем-то
         }
         flag = false;
     }
 
+    // "Разбудить" ждущие потоки после подъема флага
     public synchronized void up(){
         if (flag == false) {
             flag = true;
-            System.out.println(new Date() + " - " + Thread.currentThread().getName() + " - notify() waiting threads");
             notify();
         }
     }

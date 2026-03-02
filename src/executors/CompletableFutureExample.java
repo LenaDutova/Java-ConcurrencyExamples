@@ -41,28 +41,27 @@ public class CompletableFutureExample {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         // асинхронный запуск процедуры
-//        CompletableFuture<Void> future1 = CompletableFuture.runAsync(procedure);
-
-//        System.out.println(Thread.currentThread().getName() + " не жду");
-//        future1.get();// get() - НО дождись окончания процедуры
-//        System.out.println(Thread.currentThread().getName() + " подождал");
+        CompletableFuture<Void> future1 = CompletableFuture.runAsync(procedure);
+        future1.join();// или get() для функций, чтобы подождать выполнение.
 
         // асинхронный запуск функции, которая возвращает результат
         CompletableFuture<Integer> future2 = CompletableFuture.supplyAsync(function);
 
         // преобразовать результат
-        CompletableFuture<String> future3 = future2.thenApply(new Function<Integer, String>() {
-            @Override
-            public String apply(Integer result) {
-                return " result is " + result;
-            }
-        });
+        CompletableFuture<String> future3 = future2
+                .thenApply(new Function<Integer, String>() {
+                    @Override
+                    public String apply(Integer result) {
+                        return " result is " + result;
+                    }
+                })
+                .thenApply(s -> Thread.currentThread().getName() + ": " + s);
 
         // обработать результат
         CompletableFuture<Void> future4 = future3.thenAccept(new Consumer<String>() {
             @Override
             public void accept(String result) {
-                System.out.println(Thread.currentThread().getName() + result);
+                System.out.println(result);
             }
         });
 

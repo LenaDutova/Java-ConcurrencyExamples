@@ -12,11 +12,13 @@ import java.util.concurrent.*;
  */
 public class ExecutorsExample {
 
+    static int N = 5;
+
     // некий набор фоновых действий,
     // результат которых нам не принципиален
     static Runnable procedure = () -> {
-        for (int i = 0; i <= 50; i += 10) {
-            System.out.println(Thread.currentThread().getName() + " " + i);
+        for (int i = 0; i <= N; i ++) {
+            System.out.println(i + "-" + Thread.currentThread().getName() + ": Hello");
         }
     };
 
@@ -25,19 +27,16 @@ public class ExecutorsExample {
     // возможны исключительные ситуации
     static Callable<Integer> function = () -> {
         int result = 0;
-        for (int i = 0; i <= 50; i += 10) {
+        for (int i = 0; i <= N; i ++) {
             result += i;
-            System.out.println(Thread.currentThread().getName() + " " + result);
+            System.out.println(i + "-" + Thread.currentThread().getName() + "-" + result);
         }
         return result;
     };
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        // вручную запускаем поток и метод в нем
-        withoutExecutors();
-
-        // запуск с помощью пакета java.util.concurrent
-//        withExecutors();
+//        withoutExecutors(); // вручную запускаем поток и метод в нем
+        withExecutors();  // запуск с помощью пакета java.util.concurrent
     }
 
     /**
@@ -47,37 +46,38 @@ public class ExecutorsExample {
      * закрытия фабрики
      */
     private static void withExecutors() throws ExecutionException, InterruptedException {
+
+
         ExecutorService service = null;
+        service = Executors.newSingleThreadExecutor(); // создать пул с одним фоновым потоком
+//        service = Executors.newFixedThreadPool(10); // создать пул на несколько фоновых потоков
 
-//        service = Executors.newSingleThreadExecutor();  // создать один фоновый поток, который получит задачу
-        service = Executors.newFixedThreadPool(10); // создать несколько фоновых потоков, которые будут ожидать задачи
-
-        // можно повторять запуск процедуры,
-        // но потоки не перезапускаются
-        System.out.println("Запуск процедуры через фабричный метод Исполнителя");
+        // можно повторять запуск процедуры, но потоки не перезапускаются
         service.execute(procedure);
         service.execute(procedure);
 
 
         // выполнение фоновых задач можно дождаться
-//        System.out.println("Запуск процедуры через фабричный метод Исполнителя");
-//        Future procedureFuture = service.submit(procedure); // не execute(), а submit()
-//        procedureFuture.get(); // аналог классического метода потоков - join()
-//        System.out.println("С удержанием главного потока");
+        Future procedureFuture = service.submit(procedure); // не execute(), а submit()
+        procedureFuture.get(); // аналог классического метода потоков - join()
+        System.out.println("С удержанием главного потока");
 
 
         // а можно и получить результат, но нужен не Runnable, а Callable
-//        System.out.println("Запуск функции через фабричный метод Исполнителя с удержанием главного потока");
-//        Future future = service.submit(function);
-//        System.out.println("Is done? - " + future.isDone()); // уже посчитал?
-//        System.out.println("Is done? - " + future.isDone()); // а сейчас?
-//        System.out.println(future.get());    // get() - дождись результат функции и верни его
-//        System.out.println("Is done? - " + future.isDone()); // а теперь?
+        System.out.println("Запуск функции через фабричный метод Исполнителя с удержанием главного потока");
+        Future future = service.submit(function);
+        System.out.println("Is done? - " + future.isDone()); // уже посчитал?
+        System.out.println("Is done? - " + future.isDone()); // а сейчас?
+        System.out.println(future.get());    // get() - дождись результат функции и верни его
+        System.out.println("Is done? - " + future.isDone()); // а теперь?
 
         // TODO: обязаны закрыть, иначе программа не завершится
         service.shutdown();
     }
 
+    /**
+     * Пример создания пула потоков без использования фабричных методов
+     */
     private static void withoutExecutors(){
         // в поток легко "прокинуть" процедуру
         System.out.println("Классический запуск процедуры в исполняемом методе потока");

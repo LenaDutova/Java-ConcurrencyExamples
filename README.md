@@ -5,16 +5,17 @@
 Подробнее о потоках https://docs.oracle.com/javase/tutorial/essential/concurrency/procthread.html
 
 * __start__ - пример создания потоков и демонстрация его жизненного цикла:
+  - MainThread - демонстрация существования главного потока;
   - ThreadCreation - примеры создания потоков;
   - liveness/LifeCycle - демонстрация состояний потоков;
   - liveness/InterruptedCycle - прерывание исполняемого метода потока.
 
 * __sumofmany__ - совместная работа, на примере арифметических операций:
   - Summation - сравнения выполнения работы на одном и множестве потоков
-  - __incordec__ - увеличение и уменьшение разделяемой переменной:
-    - АsyncIncrementAndDecrement - без контроля доступа, см. различия на количестве операций;
-    - IncrementAndDecrement - различные режимы доступа Mode.ASYNC, Mode.SYNC_OBJECT, Mode.SYNC_METHOD;
-    - IncrementAndDecrementWithTerrorist - ошибка частичного ограничения доступа;
+  - __data_race__ - увеличение и уменьшение разделяемой переменной:
+    - WarningIncAndDecrement - без контроля доступа, см. различия на количестве операций;
+    - ObjectIncAndDecrement - проверка монитора разделяемого ресурса, слово synchronized на объекте;
+    - MethodIncAndDecrement - проверка монитора разделяемого ресурса, слово synchronized в его методах;
   - __deadlock__ - пример взаимоблокировки потоков на общих ресурсах при синхронизации мониторами
  
 ## since Java 5 java.util.concurrent ##

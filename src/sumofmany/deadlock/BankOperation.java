@@ -1,97 +1,85 @@
 package sumofmany.deadlock;
 
-import static sumofmany.deadlock.BankOperation.*;
-
 /**
- * Разное написание synchronized, не отменяет механизма его использования:
- * всегда идет проверка состояния синхронизируемого объекта
+ * Для работы операции transfer()
+ * будут блокироваться два объекта,
+ * но по очереди. При взаимной пересылке денег
+ * может получиться ситуация, когда отправитель и получатель
+ * заблокируют операцию transfer() друг для друга.
  *
- * Осторожно, взаимоблокировка
+ * Осторожно, взаимоблокировка.
+ * Повторить несколько запусков
  */
 public class BankOperation {
 
-    private static final int counter = 10;
-    private static final int value = 10;
-
-    private static BankAccount annAccount = new BankAccount("Ann", 100);
-    private static BankAccount bobAccount = new BankAccount("Bob", 100);
+    static BankAccount annAccount = new BankAccount("Ann", 1000);
+    static BankAccount bobAccount = new BankAccount("Bob", 1000);
+    static final int counter = 5, value = 200;
 
     public static void main(String[] args) throws InterruptedException {
 
         Thread threadAnn = new Thread(() -> {
-            for (int i = 0; i < counter; i++) {
+            for (int i = 0; i < counter; i++)
                 transfer(annAccount, bobAccount, value);
-            }
         });
+        threadAnn.start();
 
         Thread threadBob = new Thread(() -> {
-            for (int i = 0; i < counter; i++) {
+            for (int i = 0; i < counter; i++)
                 transfer(bobAccount, annAccount, value);
-            }
         });
-
-        threadAnn.start();
-//        threadBob.start();
-
-        // Ожидаем окончания работы обоих
-        if (threadAnn.isAlive()) threadAnn.join();
-        if (threadBob.isAlive()) threadBob.join();
-
-        System.out.println("FINISH");
-        annAccount.show();
-        bobAccount.show();
+        threadBob.start();
     }
 
-    /**
-     * Перевод некоторой суммы денег с одного аккаунта на другой
-     * @param from
-     * @param to
-     * @param value
-     */
-    public static boolean transfer(BankAccount from, BankAccount to, int value){
+    // Перевод некоторой суммы денег (value) с одного аккаунта (from) на другой (to)
+    public static boolean transfer (BankAccount from, BankAccount to, int value) {
         if (value < 0) return false;
 
+        // блокируем отправителя
         synchronized (from){
-            if (from.removeMoney(value))
-                if (to.putMoney(value)) {
-                    return true;
-                } else from.putMoney(value);
+            if (from.getMoney(value)){
+
+                // блокируем получателя
+                synchronized (to){
+                    if (to.putMoney(value)) {
+                        System.out.printf("+%d From %s[%5d] to %s[%5d] %n",
+                                value,
+                                from.getName(), from.getBalance(),
+                                to.getName(), to.getBalance());
+                        return true;
+                    }
+                }
+
+                from.putMoney(value);
+            }
             return false;
         }
     }
 }
 
-/**
- * Защищенный класс с помощью synchronized
- */
+//В данном классе НЕТ синхронизируемых методов
 class BankAccount {
     private int balance;
     private String name;
 
-    public BankAccount(String name, int balance) {
+    public BankAccount (String name, int balance) {
         this.name = name;
         this.balance = balance;
     }
 
-    public void show (){
-        System.out.println(name + " balance is " + balance);
-    }
-
-    public synchronized boolean putMoney (int money){
+    public boolean putMoney (int money){
         if (money >= 0) {
-            balance += money;
-            show();
-            return true;
+            balance += money; return true;
+        }
+        return false;
+    }
+    public boolean getMoney (int money){
+        if (balance >= money ) {
+            balance -= money; return true;
         }
         return false;
     }
 
-    public synchronized boolean removeMoney (int money){
-        if (balance >= money ) {
-            balance -= money;
-            show();
-            return true;
-        }
-        return false;
-    }
+    public int getBalance() { return balance; }
+    public String getName() { return name; }
 }

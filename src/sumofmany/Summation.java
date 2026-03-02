@@ -16,7 +16,7 @@ public class Summation {
     private static long sumMany = 0;
 
     public static void main(String[] args) throws InterruptedException {
-        oneWorker();
+//        oneWorker();
         manyWorkers();
     }
 
